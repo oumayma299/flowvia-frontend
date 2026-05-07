@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactPlayer from 'react-player';
-import { Play, Pause, Maximize, Volume2, VolumeX, RotateCcw, ExternalLink } from 'lucide-react';
+import { Play, Pause, Maximize, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://backend-jpbe.onrender.com/api';
 const BACKEND_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
@@ -12,37 +12,7 @@ const resolveVideoSrc = (videoPath) => {
   return `${BACKEND_ORIGIN}${normalizedPath}`;
 };
 
-const getGoogleDriveFileId = (input = '') => {
-  const url = String(input || '').trim();
-  if (!url.toLowerCase().includes('drive.google.com')) return '';
-  try {
-    const parsedUrl = new URL(url);
-    const pathMatch = parsedUrl.pathname.match(/\/file\/d\/([^/]+)/i);
-    if (pathMatch) return decodeURIComponent(pathMatch[1]);
-    return parsedUrl.searchParams.get('id') || '';
-  } catch (e) {
-    const pathMatch = url.match(/\/file\/d\/([^/?#]+)/i);
-    if (pathMatch) return pathMatch[1];
-    const idMatch = url.match(/[?&]id=([^&#]+)/i);
-    return idMatch ? idMatch[1] : '';
-  }
-};
-
-const toDriveEmbedSrc = (input = '') => {
-  const fileId = getGoogleDriveFileId(input);
-  if (fileId) return `https://drive.google.com/file/d/${fileId}/preview`;
-  return String(input).replace(/\/(view|edit)(\?.*)?$/, '/preview');
-};
-
-/** Page Drive complète (nouvel onglet) — les clics dans l’iframe ne sont pas interceptables depuis notre site. */
-const toDriveViewUrl = (input = '') => {
-  const fileId = getGoogleDriveFileId(input);
-  if (fileId) return `https://drive.google.com/file/d/${fileId}/view`;
-  const s = String(input || '').trim();
-  return /^https?:\/\//i.test(s) ? s : `https://drive.google.com/file/d/${s}/view`;
-};
-
-const isDriveUrl = (url = '') => String(url).toLowerCase().includes('drive.google.com');
+const isCloudinaryUrl = (url = '') => String(url).toLowerCase().includes('res.cloudinary.com');
 
 const VideoPlayer = ({ videoPath, title }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -53,15 +23,11 @@ const VideoPlayer = ({ videoPath, title }) => {
   const containerRef = useRef(null);
   const hideTimeout  = useRef(null);
 
-  /** Drive : iframe uniquement (la lecture directe reste souvent bloquée sans erreur → spinner infini). */
-  const embedDrive = isDriveUrl(videoPath);
+  const isCloudinary = isCloudinaryUrl(videoPath);
 
   useEffect(() => {
     setIsLoading(true);
-    if (!embedDrive) return undefined;
-    const maxWait = window.setTimeout(() => setIsLoading(false), 12000);
-    return () => clearTimeout(maxWait);
-  }, [videoPath, embedDrive]);
+  }, [videoPath]);
 
   const reactPlayerUrl = resolveVideoSrc(videoPath);
 
@@ -110,40 +76,14 @@ const VideoPlayer = ({ videoPath, title }) => {
   if (!videoPath) return null;
 
   return (
-    <div className={`vpc ${embedDrive ? 'vpc--drive' : ''}`} ref={containerRef}>
+    <div className={`vpc ${isCloudinary ? 'vpc--external' : ''}`} ref={containerRef}>
       {isLoading && (
         <div className="vpc-loader">
           <div className="vpc-spinner" />
         </div>
       )}
 
-      {embedDrive ? (
-        <>
-          <a
-            href={toDriveViewUrl(videoPath)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="vpc-drive-open"
-            aria-label="Ouvrir cette vidéo dans Google Drive"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ExternalLink size={15} aria-hidden />
-            <span className="vpc-drive-open-text">Ouvrir dans Drive</span>
-          </a>
-          <div className="vpc-drive-wrapper">
-            <iframe
-              src={toDriveEmbedSrc(videoPath)}
-              title={title || 'Video'}
-              frameBorder="0"
-              allow="autoplay; fullscreen"
-              allowFullScreen
-              onLoad={() => setIsLoading(false)}
-              className="vpc-iframe"
-            />
-          </div>
-        </>
-      ) : (
-        <div className="vpc-player-wrapper" onClick={togglePlay}>
+      <div className="vpc-player-wrapper" onClick={togglePlay}>
           <ReactPlayer
             ref={playerRef}
             url={reactPlayerUrl}
@@ -202,7 +142,6 @@ const VideoPlayer = ({ videoPath, title }) => {
             </div>
           </div>
         </div>
-      )}
 
       <style>{`
         .vpc {
@@ -217,8 +156,7 @@ const VideoPlayer = ({ videoPath, title }) => {
           box-shadow: 0 16px 48px rgba(0,0,0,0.35);
         }
 
-        /* Drive embed : ratio vidéo standard, pleine largeur du parent */
-        .vpc--drive {
+        .vpc--external {
           aspect-ratio: 16 / 9;
         }
 
@@ -241,50 +179,6 @@ const VideoPlayer = ({ videoPath, title }) => {
           animation: vpc-spin 0.9s linear infinite;
         }
         @keyframes vpc-spin { to { transform: rotate(360deg); } }
-
-        .vpc-drive-open {
-          position: absolute;
-          top: 8px;
-          right: 8px;
-          z-index: 30;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 7px 11px;
-          background: rgba(255, 255, 255, 0.96);
-          color: #0f172a;
-          font-size: 12px;
-          font-weight: 700;
-          border-radius: 10px;
-          text-decoration: none;
-          box-shadow: 0 2px 14px rgba(0, 0, 0, 0.22);
-          border: 1px solid rgba(15, 23, 42, 0.08);
-          transition: background 0.15s ease, transform 0.12s ease;
-        }
-        .vpc-drive-open:active {
-          transform: scale(0.98);
-        }
-        .vpc-drive-open:hover {
-          background: #fff;
-        }
-
-        /* ── Drive iframe ── */
-        .vpc-drive-wrapper {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          -webkit-overflow-scrolling: touch;
-        }
-        .vpc-iframe {
-          width: 100%;
-          height: 100%;
-          border: none;
-          display: block;
-        }
-
-        /* Drive : pas de transform/zoom — ça décale la barre et les boutons dans l’iframe (cross-origin). */
 
         /* ── ReactPlayer wrapper ── */
         .vpc-player-wrapper {
@@ -403,7 +297,7 @@ const VideoPlayer = ({ videoPath, title }) => {
             border-radius: 10px; 
             aspect-ratio: 4 / 5;
           }
-          .vpc--drive {
+          .vpc--external {
             aspect-ratio: 16 / 9;
           }
           .vpc-big-btn {
@@ -417,18 +311,6 @@ const VideoPlayer = ({ videoPath, title }) => {
           .vpc-overlay { padding: 8px; }
           .vpc-title { font-size: 11px; }
           .vpc-left, .vpc-right { gap: 6px; }
-          .vpc-drive-open {
-            top: 6px;
-            right: 6px;
-            padding: 6px 9px;
-            font-size: 11px;
-          }
-          .vpc-drive-open-text {
-            max-width: 112px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
         }
       `}</style>
     </div>

@@ -145,7 +145,7 @@ function TherapistSessionManage() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px', fontWeight: 'bold' }}>
             <span style={{ color: 'var(--primary)' }}>
-              {progress < 100 ? `Upload : ${progress}%` : 'Traitement Drive...'}
+              {progress < 100 ? `Upload : ${progress}%` : 'Traitement Cloudinary...'}
             </span>
             <span style={{ color: 'var(--text-muted)' }}>Ne fermez pas la page</span>
           </div>
@@ -221,7 +221,7 @@ function TherapistSessionManage() {
               <div style={{ marginTop: '20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
                   <span style={{ fontWeight: '600', color: 'var(--primary)' }}>
-                    {progress < 100 ? `Upload en cours : ${progress}%` : 'Traitement par Google Drive...'}
+                    {progress < 100 ? `Upload en cours : ${progress}%` : 'Traitement par Cloudinary...'}
                   </span>
                 </div>
                 <div style={{ width: '100%', height: '8px', backgroundColor: '#e9ecef', borderRadius: '4px', overflow: 'hidden' }}>

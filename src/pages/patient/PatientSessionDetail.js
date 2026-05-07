@@ -4,7 +4,7 @@ import api from '../../api';
 import Layout from '../../components/Layout';
 import VideoPlayer from '../../components/VideoPlayer';
 
-const isDriveVideoUrl = (path) => String(path || '').toLowerCase().includes('drive.google.com');
+const isCloudinaryVideoUrl = (path) => String(path || '').toLowerCase().includes('res.cloudinary.com');
 
 function PatientSessionDetail() {
   const { id } = useParams();
@@ -74,7 +74,7 @@ function PatientSessionDetail() {
               <div className="exercise-layout">
                 {ex.videoPath && (
                   <div
-                    className={`exercise-video-section${isDriveVideoUrl(ex.videoPath) ? ' exercise-video-section--drive' : ''}`}
+                    className={`exercise-video-section${isCloudinaryVideoUrl(ex.videoPath) ? ' exercise-video-section--cloudinary' : ''}`}
                   >
                     <VideoPlayer videoPath={ex.videoPath} title={ex.title} />
                   </div>
@@ -450,8 +450,8 @@ function PatientSessionDetail() {
           .exercise-title { font-size: 1.4rem; }
           .exercise-index { left: 24px; }
           .back-link { padding: 6px 12px; font-size: 13px; }
-          /* Vidéo Drive : utilise toute la largeur utile de la carte (pas de marge latérale sur le bloc vidéo) */
-          .exercise-video-section--drive {
+          /* Vidéo Cloudinary : utilise toute la largeur utile de la carte */
+          .exercise-video-section--cloudinary {
             margin-left: -24px;
             margin-right: -24px;
             width: calc(100% + 48px);
