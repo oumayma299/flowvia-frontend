@@ -103,7 +103,7 @@ const VideoPlayer = ({ videoPath, title }) => {
         }
 
         const player = window.cloudinary.videoPlayer(cloudinaryVideoRef.current, {
-          cloud_name: cloudinaryInfo.cloudName,
+          cloud_name: cloudinaryCloudName,
           controls: true,
           fluid: true,
           muted: false,
