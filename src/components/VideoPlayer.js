@@ -81,13 +81,15 @@ const VideoPlayer = ({ videoPath, title }) => {
   const isCloudinary = isCloudinaryUrl(videoPath);
   const reactPlayerUrl = resolveVideoSrc(videoPath);
   const cloudinaryInfo = isCloudinary ? parseCloudinaryVideoInfo(reactPlayerUrl) : null;
+  const cloudinaryCloudName = cloudinaryInfo?.cloudName || '';
+  const cloudinaryPublicId = cloudinaryInfo?.publicId || '';
 
   useEffect(() => {
     setIsLoading(true);
   }, [videoPath]);
 
   useEffect(() => {
-    if (!isCloudinary || !cloudinaryInfo || !cloudinaryVideoRef.current) return undefined;
+    if (!isCloudinary || !cloudinaryCloudName || !cloudinaryPublicId || !cloudinaryVideoRef.current) return undefined;
 
     let cancelled = false;
     setCloudinaryReady(false);
@@ -110,7 +112,7 @@ const VideoPlayer = ({ videoPath, title }) => {
         });
 
         cloudinaryPlayerRef.current = player;
-        player.source(cloudinaryInfo.publicId);
+        player.source(cloudinaryPublicId);
         player.on('loadeddata', () => setIsLoading(false));
         player.on('waiting', () => setIsLoading(true));
         player.on('playing', () => setIsLoading(false));
@@ -131,7 +133,7 @@ const VideoPlayer = ({ videoPath, title }) => {
         cloudinaryPlayerRef.current = null;
       }
     };
-  }, [isCloudinary, cloudinaryInfo?.cloudName, cloudinaryInfo?.publicId]);
+  }, [isCloudinary, cloudinaryCloudName, cloudinaryPublicId]);
 
   useEffect(() => {
     if (isCloudinary) return undefined;
