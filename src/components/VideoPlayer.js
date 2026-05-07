@@ -190,7 +190,14 @@ const VideoPlayer = ({ videoPath, title }) => {
 
       {isCloudinary && cloudinaryInfo ? (
         <div className="vpc-cloudinary-wrapper">
-          <video ref={cloudinaryVideoRef} className="cld-video-player cld-fluid" playsInline />
+          <video
+            ref={cloudinaryVideoRef}
+            className="cld-video-player cld-fluid"
+            playsInline
+            controls
+            preload="metadata"
+            src={reactPlayerUrl}
+          />
         </div>
       ) : (
         <div className="vpc-player-wrapper" onClick={togglePlay}>
@@ -312,6 +319,13 @@ const VideoPlayer = ({ videoPath, title }) => {
           width: 100%;
           height: 100%;
           object-fit: contain;
+        }
+
+        /* Force Cloudinary controls visibility when skins hide them */
+        .vpc-cloudinary-wrapper .vjs-control-bar {
+          display: flex !important;
+          opacity: 1 !important;
+          visibility: visible !important;
         }
 
         .vpc-cloudinary-fallback {
