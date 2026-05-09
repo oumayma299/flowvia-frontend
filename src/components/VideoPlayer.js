@@ -271,7 +271,7 @@ const VideoPlayer = ({ videoPath, title }) => {
           width: 100%;
           max-width: 100%;
           box-sizing: border-box;
-          aspect-ratio: 4 / 3;
+          aspect-ratio: 9 / 16;
           background: #000000;
           border-radius: 16px;
           overflow: hidden;
@@ -279,7 +279,7 @@ const VideoPlayer = ({ videoPath, title }) => {
         }
 
         .vpc--external {
-          aspect-ratio: 16 / 9;
+          aspect-ratio: 9 / 16;
         }
 
         .vpc-loader {
@@ -440,10 +440,10 @@ const VideoPlayer = ({ videoPath, title }) => {
         @media (max-width: 768px) {
           .vpc {
             border-radius: 10px;
-            aspect-ratio: 4 / 5;
+            aspect-ratio: 9 / 16;
           }
           .vpc--external {
-            aspect-ratio: 16 / 9;
+            aspect-ratio: 9 / 16;
           }
           .vpc-big-btn {
             width: 44px;
